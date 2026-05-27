@@ -4,13 +4,8 @@ import librosa
 import pickle
 import warnings
 
-# Tắt các cảnh báo không cần thiết
 warnings.filterwarnings("ignore", category=UserWarning)
 
-
-# ==========================================
-# 0. ĐỊNH NGHĨA LỚP KDNode (Bắt buộc để load pkl)
-# ==========================================
 class KDNode:
     def __init__(self, point, audio_id, left=None, right=None, axis=0):
         self.point = point
@@ -19,10 +14,6 @@ class KDNode:
         self.right = right
         self.axis = axis
 
-
-# ==========================================
-# 1. CẤU HÌNH & TÊN ĐẶC TRƯNG
-# ==========================================
 SAMPLE_RATE = 16000
 N_MFCC = 13
 N_FFT = 512
@@ -67,12 +58,8 @@ def search_kdtree(root, target, k=3):
     return best_nodes
 
 
-# ==========================================
-# 2. HÀM TRÍCH XUẤT VÀ CHUẨN HÓA (Dùng Scaler Pkl)
-# ==========================================
 def extract_and_normalize(file_path, means, stds):
     try:
-        # A. Trích xuất thô (giống hệt extractor ban đầu)
         y_raw, sr = librosa.load(file_path, sr=SAMPLE_RATE)
         rms_raw = librosa.feature.rms(y=y_raw, frame_length=N_FFT, hop_length=HOP_LENGTH)
         silence_ratio = np.sum(rms_raw < 0.01) / float(rms_raw.shape[1])
@@ -92,10 +79,8 @@ def extract_and_normalize(file_path, means, stds):
 
         raw_vector = np.concatenate((mfcc_mean, [silence_ratio, harmonicity, centroid_mean]))
 
-        # B. Áp dụng Z-Score dựa trên tham số đã lưu
         standardized = (raw_vector - means) / stds
 
-        # C. Áp dụng L2 Normalization
         norm = np.linalg.norm(standardized)
         l2_vector = standardized if norm == 0 else standardized / norm
 
@@ -106,26 +91,19 @@ def extract_and_normalize(file_path, means, stds):
         return None
 
 
-# ==========================================
-# 3. CHƯƠNG TRÌNH CHÍNH
-# ==========================================
 def main():
    model_file = "local_kdtree_model.pkl"
    scaler_file = "scaler_params.pkl"
-
 
    if not os.path.exists(model_file) or not os.path.exists(scaler_file):
        print("Error: Missing .pkl file!")
        return
 
-
-   # Nạp dữ liệu
    print("[1/3] Push Tree & parameters into RAM...")
    with open(model_file, "rb") as f:
        model_data = pickle.load(f)
    with open(scaler_file, "rb") as f:
        scaler_data = pickle.load(f)
-
 
    kd_tree_root = model_data["tree_root"]
    audio_dict = model_data["audio_dict"]
@@ -133,7 +111,6 @@ def main():
    GLOBAL_STDS = scaler_data["stds"]
 
 
-   # Nhập file truy vấn
    query_audio_path = r"D:\College\mmds\6147_34605_first10.flac"
    if query_audio_path.startswith(('"', "'")) and query_audio_path.endswith(('"', "'")):
        query_audio_path = query_audio_path[1:-1]
@@ -144,42 +121,30 @@ def main():
        return
 
 
-   # Xử lý
    print(f"[3/3] Analize voice...")
    query_vector = extract_and_normalize(query_audio_path, GLOBAL_MEANS, GLOBAL_STDS)
 
 
    if query_vector is None: return
 
-
-   # In kết quả theo phong cách test_query.py
    print(f"\n{'=' * 80}")
    print(f"SEARCHING KD-TREE FOR: {os.path.basename(query_audio_path)}")
    print(f"{'=' * 80}\n")
 
-
    top_results = search_kdtree(kd_tree_root, query_vector, k=3)
-
 
    for rank, (dist, node) in enumerate(top_results, 1):
        f_name = audio_dict.get(node.audio_id, "Unknown File")
 
-
-       # Công thức tính % tương đồng từ khoảng cách Euclide
        similarity_pct = max(0.0, (1 - (dist ** 2) / 2)) * 100
 
-
-       # Phân tích các đặc trưng khớp nhất
        feature_diffs = np.abs(query_vector - node.point)
        closest_indices = np.argsort(feature_diffs)[:3]
        driving_features = [FEATURE_NAMES[i] for i in closest_indices]
 
-
        print(f"[{rank}] {f_name}")
        print(f"    ├─ Similarity: {similarity_pct:.2f}%  (Distance: {dist:.4f})")
        print(f"    └─ Strongest Matches: {driving_features[0]}, {driving_features[1]}, {driving_features[2]}\n")
-
-
 
 if __name__ == "__main__":
     main()
