@@ -133,8 +133,8 @@ N_MFCC = 13
 N_FFT = 512
 HOP_LENGTH = 160
 AUDIO_DIR = r"D:\College\mmds\merged_audio"
-MODEL_FILE = "../local_kdtree_model.pkl"
-SCALER_FILE = "../scaler_params.pkl"
+MODEL_FILE = "../tree/local_kdtree_model.pkl"
+SCALER_FILE = "../tree/scaler_params.pkl"
 
 
 def extract_raw_features(file_path):

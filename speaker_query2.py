@@ -113,7 +113,7 @@ def search_database(query_vector, k=3):
 
 
 def main():
-    scaler_file = "scaler_params.pkl"
+    scaler_file = "tree/scaler_params.pkl"
 
     if not os.path.exists(scaler_file):
         print("Error: Missing scaler_params.pkl file!")

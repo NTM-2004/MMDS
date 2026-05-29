@@ -55,7 +55,7 @@ def search_kdtree(root, target, k=5):
 
 def main():
     model_file = "../Hoang/local_kdtree_model.pkl"
-    excel_file = "../audio_features_report.xlsx"
+    excel_file = "audio_features_report.xlsx"
 
     if not os.path.exists(model_file) or not os.path.exists(excel_file):
         print("Error: Run extraction and tree building scripts first.")

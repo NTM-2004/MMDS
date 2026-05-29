@@ -92,8 +92,8 @@ def extract_and_normalize(file_path, means, stds):
 
 
 def main():
-   model_file = "local_kdtree_model.pkl"
-   scaler_file = "scaler_params.pkl"
+   model_file = "tree/local_kdtree_model.pkl"
+   scaler_file = "tree/scaler_params.pkl"
 
    if not os.path.exists(model_file) or not os.path.exists(scaler_file):
        print("Error: Missing .pkl file!")

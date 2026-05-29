@@ -9,7 +9,7 @@ DB_NAME = "speech"
 DB_USER = "postgres"  # Thay bằng username của bạn
 DB_PASS = "123456"  # Thay bằng mật khẩu của bạn
 
-EXCEL_FILE = "../audio_features_report.xlsx"
+EXCEL_FILE = "audio_features_report.xlsx"
 
 
 def main():

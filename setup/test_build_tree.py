@@ -33,7 +33,7 @@ def build_kdtree(points, ids, depth=0):
     return KDNode(median_point, median_id, left_branch, right_branch, axis)
 
 def main():
-    excel_file = "../audio_features_report.xlsx"
+    excel_file = "audio_features_report.xlsx"
     output_file = "../Hoang/local_kdtree_model.pkl"
 
     print("1. Loading Data from Excel...")
