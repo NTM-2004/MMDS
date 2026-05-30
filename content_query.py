@@ -27,8 +27,8 @@ def main():
         print(f"Database connection failed: {e}")
         return
 
-    # Replace this path with the audio file you want to query
-    input_file = r"D:\College\mmds\merged_all_test.flac"
+    input_str = input("\nEnter the audio file: ")
+    input_file = input_str.strip().strip("'").strip('"')
 
     if not os.path.exists(input_file):
         print(f"Error: Input file '{input_file}' not found.")
@@ -41,23 +41,18 @@ def main():
     transcribe_result = stt_model.transcribe(input_file, language="en", fp16=False)
     input_text = transcribe_result["text"].lower()
 
-    # Tokenize the text and extract unique words using set()
-    # Converted to a tuple so it can be passed safely into the psycopg2 IN clause
     input_words = tuple(set(input_text.split()))
-
-    # print(f"      -> Extracted Text: '{input_text}'")
-    # print(f"      -> Unique Keywords Found: {len(input_words)} words")
 
     print("\n[4/4] Querying Inverted Index for matching content...")
 
     if input_words:
         query = """
-            SELECT a.fileName, SUM(i.tf_idfScore), a.filePath as match_score
+            SELECT a.fileName, SUM(i.tf_idfScore) as match_score, a.filePath
             FROM InvertedFile i
             JOIN Keyword k ON i.keywordId = k.keywordId
             JOIN Audio a ON i.audioId = a.audioId
             WHERE k.word IN %s
-            GROUP BY a.audioId, a.fileName
+            GROUP BY a.audioId, a.fileName, a.filePath
             ORDER BY match_score DESC
             LIMIT 3;
         """

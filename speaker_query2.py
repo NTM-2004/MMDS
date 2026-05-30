@@ -127,7 +127,8 @@ def main():
     GLOBAL_STDS = scaler_data["stds"]
 
     # Target audio file for the query
-    query_audio_path = r"D:\College\mmds\6147_34605_first10.flac"
+    input_str = input("\nEnter the audio file: ")
+    query_audio_path = input_str.strip().strip("'").strip('"')
 
     # Remove surrounding quotes if dragged-and-dropped into terminal
     if query_audio_path.startswith(('"', "'")) and query_audio_path.endswith(('"', "'")):
