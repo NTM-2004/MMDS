@@ -93,7 +93,7 @@ def search_database(query_vector, k=3):
         # 2. Execute vector search query
         # Using <-> for Euclidean distance natively supported by pgvector
         query = """
-            SELECT fileName, speakerFeature, (speakerFeature <-> %s::vector) AS distance
+            SELECT fileName, speakerFeature, (speakerFeature <-> %s::vector) AS distance, filePath
             FROM Audio
             ORDER BY distance ASC
             LIMIT %s;
@@ -143,8 +143,9 @@ def main():
     if query_vector is None:
         return
 
+    query_url = query_audio_path.replace('\\', '/')
     print(f"\n{'=' * 80}")
-    print(f"SEARCHING DATABASE FOR: {os.path.basename(query_audio_path)}")
+    print(f"SEARCHING DATABASE FOR: {os.path.basename(query_audio_path)}: file:///{query_url}")
     print(f"{'=' * 80}\n")
 
     print("[3/3] Querying PostgreSQL pgvector...")
@@ -155,7 +156,7 @@ def main():
         return
 
     # Process and display results
-    for rank, (f_name, db_vector_str, dist) in enumerate(top_results, 1):
+    for rank, (f_name, db_vector_str, dist, file_path) in enumerate(top_results, 1):
 
         # Convert pgvector string format '[v1, v2, ...]' back to a numpy array for difference calculation
         if isinstance(db_vector_str, str):
@@ -172,7 +173,8 @@ def main():
         closest_indices = np.argsort(feature_diffs)[:3]
         driving_features = [FEATURE_NAMES[i] for i in closest_indices]
 
-        print(f"[{rank}] {f_name}")
+        abs_path = os.path.abspath(file_path).replace('\\', '/')
+        print(f"[{rank}] {f_name}: file:///{abs_path}")
         print(f"    ├─ Similarity: {similarity_pct:.2f}%  (Distance: {dist:.4f})")
         print(f"    └─ Strongest Matches: {driving_features[0]}, {driving_features[1]}, {driving_features[2]}\n")
 

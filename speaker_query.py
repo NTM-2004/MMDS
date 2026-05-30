@@ -127,8 +127,9 @@ def main():
 
    if query_vector is None: return
 
+   query_url = query_audio_path.replace('\\', '/')
    print(f"\n{'=' * 80}")
-   print(f"SEARCHING KD-TREE FOR: {os.path.basename(query_audio_path)}")
+   print(f"SEARCHING KD-TREE FOR: file:///{query_url}")
    print(f"{'=' * 80}\n")
 
    top_results = search_kdtree(kd_tree_root, query_vector, k=3)
@@ -142,7 +143,9 @@ def main():
        closest_indices = np.argsort(feature_diffs)[:3]
        driving_features = [FEATURE_NAMES[i] for i in closest_indices]
 
-       print(f"[{rank}] {f_name}")
+       relative_path = os.path.join("merged_audio", f_name)
+       abs_path = os.path.abspath(relative_path).replace('\\', '/')
+       print(f"[{rank}] {f_name}: file:///{abs_path}")
        print(f"    ├─ Similarity: {similarity_pct:.2f}%  (Distance: {dist:.4f})")
        print(f"    └─ Strongest Matches: {driving_features[0]}, {driving_features[1]}, {driving_features[2]}\n")
 
